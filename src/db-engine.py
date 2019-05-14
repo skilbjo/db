@@ -1,33 +1,18 @@
 #!/usr/bin/env python3
-from collections import OrderedDict
+from nodes import Scan, Selection
 
-class Selection:
-  def __init__(self):
-    yield
-  def next(self):
-    yield
-  def close(self):
-    return
+query = [
+  ["PROJECTION", ["name"]],
+  ["SELECTION", ["id", "EQUALS", "5000"]],
+  ["FILESCAN", ["movies"]]
+]
 
-def while_data(data):
-  for row in data:
-    try:
-      yield row
-    except StopIteration:
-      return
-
-class Scan:
-  def __init__(self):
-    self.data = [OrderedDict([('id', '1'), ('name', 'John'), ('age', '30')]), OrderedDict([('id', '2'), ('name', 'Michie'), ('age', '25')])]
-  def iterate_data(self):
-    while True:
-      for row in iter(self.data):
-        yield row
-  def next(self,predicate):
-    row = iterate_data()
-    return row
-  def close(self):
-    return
+query2 = [
+  ["AVERAGE"],
+  ["PROJECTION", ["rating"]],
+  ["SELECTION", ["movie_id", "EQUALS", "5000"]],
+  ["FILESCAN", ["ratings"]]
+]
 
 def execute_plan(plan):
   r = Scan()
