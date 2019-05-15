@@ -15,8 +15,8 @@ query2 = [
 ]
 
 def execute_plan(plan):
-  s = Selection(Scan(),['id','=','1']).next()
-  print(s)
+  s = Selection(Scan('names'),['id','=','2']).next()
+  print('printing s:',s)
   return s
 
 def query():
