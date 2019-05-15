@@ -1,4 +1,6 @@
-def iterate_data(self):
-  while True:
-    for row in iter(self.data):
+def iterate_data(data):
+  try:
+    for row in iter(data):
       yield row
+  except StopIteration:
+    return

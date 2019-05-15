@@ -15,11 +15,9 @@ query2 = [
 ]
 
 def execute_plan(plan):
-  r = Scan()
-  row = next(r.next(True))
-  row = next(r.next(True))
-  print(row)
-  return row
+  s = Selection(Scan(),['id','=','1']).next()
+  print(s)
+  return s
 
 def query():
   return execute_plan('')
