@@ -1,4 +1,5 @@
 import data, operator
+from collections import OrderedDict
 
 operator = {
     "=" : operator.eq,
@@ -43,9 +44,19 @@ class Projection:
     self.data     = data
     self.fields   = fields # ["id", "name"]
   def next(self):
-    dictfilt = lambda x, y: dict([ (i,x[i]) for i in x if i in set(y) ])
+    result = OrderedDict()
     row = self.data.next()
-    result = dictfilt(row, fields)
+
+    ## Idea is select the fields out of the row
+    ## make sure to first see if the row is either None or EOF
+    ## there is no existing method to select the keys you want from an OrderedDict in python
+    ## so need to do it iteratively
+    ## probably will need to loop through the fields array, and see if there is a match in the row
+    ## if match, add to tmp result, then return tmp result
+    for field in self.fields:
+      print(field)
+    # result = row
+    print(result)
     return result
 
 class Aggregation:
@@ -78,11 +89,12 @@ class Iterator:
     self.plan = plan
     self.scan       = node_translation["FILESCAN"](plan["FILESCAN"][0])
     self.selection  = node_translation["SELECTION"](self.scan, plan["SELECTION"])
-    self.projection = node_translation["PROJECTION"](self.selection, plan["PROJECTION"][0])
+    self.projection = node_translation["PROJECTION"](self.selection, plan["PROJECTION"])
+    self.tmp        = []
     self.result     = []
   def next(self):
-    row = self.selection.next()
+    row = self.projection.next()
     while row != 'EOF':
       self.result.append(row)
-      row = self.selection.next()
+      row = self.projection.next()
     return [x for x in self.result if x is not None]
