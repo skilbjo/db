@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from nodes import Iterator
+from nodes import Selection, Scan # for testing
 
 query = {
   "PROJECTION": ["name"],
@@ -16,10 +17,11 @@ query2 = [
 
 def execute_plan(plan):
   # s = Selection(Scan('people'),['id','=','2']).next()
-  # print(plan["FILESCAN"])
 
-  s = Iterator(plan).next()
-  # print('printing s:',s)
+  s = Iterator(plan)
+  s.next()
+
+  print('printing s:',s)
   return
 
 def main(function, cmd=None):

@@ -30,9 +30,6 @@ class Scan:
     self.table      = data.select(table)
     self.length     = len(self.table) - 1
     self.index      = 0
-  def reset(self):
-    self.index = 0
-    return
   def next(self):
     result = []
     if self.index < self.length:
@@ -92,8 +89,7 @@ node_translation = {
 }
 
 class Iterator:
-  def __init__(self, plan): #aggregation, projection, selection, scan):
-    # self.scan = Scan(plan[plan.index("FILESCAN")][1])
+  def __init__(self, plan):
     self.scan       = node_translation["FILESCAN"](plan["FILESCAN"][0])
     self.selection  = node_translation["SELECTION"](self.scan, plan["SELECTION"])
     self.projection = node_translation["PROJECTION"](self.selection, plan["PROJECTION"][0])
