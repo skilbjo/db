@@ -4,7 +4,7 @@ from nodes import Selection, Scan # for testing
 
 query = {
   "PROJECTION": ["name"],
-  "SELECTION" : ["id", "=", "2"],
+  "SELECTION" : ["id", ">", "2"],
   "FILESCAN"  : ["people"]
 }
 
@@ -19,7 +19,7 @@ def execute_plan(plan):
   # s = Selection(Scan('people'),['id','=','2']).next()
 
   s = Iterator(plan)
-  s.next()
+  s = s.next()
 
   print('printing s:',s)
   return
