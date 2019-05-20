@@ -3,17 +3,17 @@ from nodes import Iterator
 from nodes import Selection, Scan # for testing
 
 query = {
-  "PROJECTION": ["name"],
-  "SELECTION" : ["id", ">", "2"],
-  "FILESCAN"  : ["people"]
+  'PROJECTION': ['name','id'],
+  'SELECTION' : ['id', '>', '2'],
+  'FILESCAN'  : ['people']
 }
 
-query2 = [
-  ["AVERAGE"],
-  ["PROJECTION", ["age"]],
-  ["SELECTION", ["age", ">=", "20"]],
-  ["FILESCAN", ["people"]]
-]
+query2 = {
+  'AGGREGATION': ['sum','age'],
+  'PROJECTION' : ['age'],
+  'SELECTION'  : ['id', '>', '2'],
+  'FILESCAN'   : ['people']
+}
 
 def execute_plan(plan):
   # s = Selection(Scan('people'),['id','=','2']).next()
@@ -25,9 +25,9 @@ def execute_plan(plan):
   return
 
 def main(function, cmd=None):
-  return execute_plan(query)
+  return execute_plan(query2)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   import argparse
 
   parser = argparse.ArgumentParser(description='Run some queries')
