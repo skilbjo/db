@@ -1,5 +1,4 @@
 import data, operator
-from collections import OrderedDict
 
 operator = {
     '=' : operator.eq,
@@ -41,28 +40,31 @@ class Scan:
 
 class Projection:
   def __init__(self, data, fields):
+    from collections import OrderedDict
     self.data     = data
     self.fields   = fields # ['id', 'name']
+    self.result   = OrderedDict()
   def next(self):
     row = self.data.next()
-    result = OrderedDict()
     if row == 'EOF' or row is None:
       return row
     else:
       for field in self.fields: # return [row[k] for k in self.fields] # returns list, not OrderedDict
-        result.update({field : row[field]})
-      return result
+        self.result.update({field : row[field]})
+      return self.result
 
 class Aggregation:
   def __init__(self, data, type, field): # type enum: sum, count, average
+    self.data   = data
     self.type   = type
     self.field  = field
     self.result = {'sum': 0, 'count': 0}
   def next(self):
     row = self.data.next()
-    while row != 'EOF' and row is not None:
-      self.result['sum']   += row[field]
-      self.result['count'] += 1
+    while row != 'EOF':
+      if row is not None:
+        self.result['sum']   += int(row[self.field])
+        self.result['count'] += 1
       row = self.data.next()
     if self.type == 'average':
       return self.result['sum'] / self.result['count']
@@ -71,11 +73,13 @@ class Aggregation:
 
 class Sort:
   def __init__(self):
+    return
   def next(self):
     yield
 
 class Distinct:
   def __init__(self):
+    return
   def next(self):
     yield
 
@@ -101,15 +105,12 @@ class Iterator:
     self.scan        = node_translation['FILESCAN'](plan['FILESCAN'][0])
     self.selection   = node_translation['SELECTION'](self.scan, plan['SELECTION'])
     self.projection  = node_translation['PROJECTION'](self.selection, plan['PROJECTION'])
-    self.aggregation = node_translation['AGGREGATION'](plan['AGGREGATION'][0], plan['AGGREGATION'][1])
+    self.aggregation = node_translation['AGGREGATION'](self.projection, plan['AGGREGATION'][0], plan['AGGREGATION'][1]) if 'AGGREGATION' in self.plan else None
     self.result      = []
   def next(self):
-    if 'AGGREGATION' not in self.plan.keys():
+    if self.aggregation:
       row = self.aggregation.next()
-      while row != 'EOF':
-        self.result.append(row)
-        row = self.projection.next()
-      return [x for x in self.result if x is not None]
+      return row
     else:
       row = self.projection.next()
       while row != 'EOF':
