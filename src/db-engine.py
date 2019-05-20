@@ -14,18 +14,24 @@ query2 = {
   'FILESCAN'   : ['people']
 }
 
+query3 = {
+  'AGGREGATION': ['average','age'],
+  'PROJECTION' : ['age'],
+  'SELECTION'  : ['id', '>=', '0'],
+  'FILESCAN'   : ['people']
+}
+
 def execute_plan(plan):
   result = Iterator(plan).next()
-  return result
+  print('--- query ---')
+  print('printing query :',plan)
+  print('printing result:',result)
+  return
 
 def main(function, cmd=None):
-  print('--- query ---')
-  print('printing query :',query)
-  print('printing result:',execute_plan(query))
-
-  print('--- query ---')
-  print('printing query :',query2)
-  print('printing result:',execute_plan(query2))
+  execute_plan(query)
+  execute_plan(query2)
+  execute_plan(query3)
   return
 
 if __name__ == '__main__':
