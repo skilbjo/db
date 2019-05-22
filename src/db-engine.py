@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 from nodes import Iterator
 
-query = {
-  'PROJECTION': ['name','id'],
-  'SELECTION' : ['id', '>', '2'],
-  'FILESCAN'  : ['people']
-}
+query = [
+  ['PROJECTION', ['name','id']],
+  ['SELECTION', ['id', '>', '2']],
+  ['FILESCAN', ['people']]
+]
 
-query2 = {
-  'AGGREGATION': ['sum','age'],
-  'PROJECTION' : ['age'],
-  'SELECTION'  : ['id', '>=', '0'],
-  'FILESCAN'   : ['people']
-}
+query2 = [
+  ['SUM'],
+  ['PROJECTION', ['age']],
+  ['SELECTION', ['id', '>=', '0']],
+  ['FILESCAN', ['people']]
+]
 
-query3 = {
-  'AGGREGATION': ['average','age'],
-  'PROJECTION' : ['age'],
-  'SELECTION'  : ['id', '>=', '0'],
-  'FILESCAN'   : ['people']
-}
+query3 = [
+  ['AVERAGE'],
+  ['PROJECTION', ['age']],
+  ['SELECTION', ['id', '>=', '0']],
+  ['FILESCAN', ['people']]
+]
 
 def execute_plan(plan):
   result = Iterator(plan).next()

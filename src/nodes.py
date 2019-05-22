@@ -99,21 +99,32 @@ node_translation = {
   'SELECTION'  : Selection
 }
 
+def tree(plan):
+  for xs in plan[1:]:
+    plan[0]._inputs.append(tree(xs))
+  return plan[0]
+
 class Iterator:
   def __init__(self, plan):
     self.plan = plan
-    self.scan        = node_translation['FILESCAN'](plan['FILESCAN'][0])
-    self.selection   = node_translation['SELECTION'](self.scan, plan['SELECTION'])
-    self.projection  = node_translation['PROJECTION'](self.selection, plan['PROJECTION'])
-    self.aggregation = node_translation['AGGREGATION'](self.projection, plan['AGGREGATION'][0], plan['AGGREGATION'][1]) if 'AGGREGATION' in self.plan else None
-    self.result      = []
   def next(self):
-    if self.aggregation:
-      row = self.aggregation.next()
-      return row
-    else:
-      row = self.projection.next()
-      while row != 'EOF':
-        self.result.append(row)
-        row = self.projection.next()
-      return [x for x in self.result if x is not None]
+    return tree(plan)
+
+# class Iterator:
+  # def __init__(self, plan):
+    # self.plan = plan
+    # self.scan        = node_translation['FILESCAN'](plan['FILESCAN'][0])
+    # self.selection   = node_translation['SELECTION'](self.scan, plan['SELECTION'])
+    # self.projection  = node_translation['PROJECTION'](self.selection, plan['PROJECTION'])
+    # self.aggregation = node_translation['AGGREGATION'](self.projection, plan['AGGREGATION'][0], plan['AGGREGATION'][1]) if 'AGGREGATION' in self.plan else None
+    # self.result      = []
+  # def next(self):
+    # if self.aggregation:
+      # row = self.aggregation.next()
+      # return row
+    # else:
+      # row = self.projection.next()
+      # while row != 'EOF':
+        # self.result.append(row)
+        # row = self.projection.next()
+      # return [x for x in self.result if x is not None]
