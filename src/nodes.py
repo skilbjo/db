@@ -9,9 +9,15 @@ operator = {
     '<=': operator.le
 }
 
-class Selection:
-  def __init__(self,data,predicate):
-    self.data      = data
+class PlanNode:
+  def __init__(self):
+    self._inputs = []
+  def __iter__(self):
+    return next
+
+class Selection(PlanNode):
+  def __init__(self,predicate):
+    super().__init__()
     self.predicate = predicate
   def next(self):
     row = self.data.next()
@@ -108,7 +114,7 @@ class Iterator:
   def __init__(self, plan):
     self.plan = plan
   def next(self):
-    return tree(plan)
+    return tree(self.plan)
 
 # class Iterator:
   # def __init__(self, plan):
