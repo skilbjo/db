@@ -1,13 +1,4 @@
-import data, operator
-
-operator = {
-    '=' : operator.eq,
-    '!=': operator.ne,
-    '>' : operator.gt,
-    '>=': operator.ge,
-    '<' : operator.lt,
-    '<=': operator.le
-}
+import data
 
 class PlanNode:
   def __init__(self):
@@ -20,9 +11,12 @@ class Selection(PlanNode):
     super().__init__()
     self.predicate = predicate
   def next(self):
+    import util
+    record = next(self._inputs[0])
+    return self.predicate(record)
     row = self.data.next()
     if row != 'EOF':
-      if operator[self.predicate[1]](row[self.predicate[0]], self.predicate[2]):
+      if util.operator[self.predicate[1]](row[self.predicate[0]], self.predicate[2]):
         return row
     else:
       return 'EOF'
