@@ -1,37 +1,28 @@
 #!/usr/bin/env python3
-from nodes import Iterator
+import util
+# from nodes import Projection, Selection, MemScan, Iterator
+from nodes import Selection, MemScan, Iterator
 
-query = [
-  ['PROJECTION', ['name','id']],
-  ['SELECTION', ['id', '>', '2']],
-  ['FILESCAN', ['people']]
-]
+# query = util.tree([
+  # Projection(lambda r: r.'name'),[
+    # Selection(lambda r: r.id == 1),[
+      # MemScan(data.people)]]])
 
-query2 = [
-  ['SUM'],
-  ['PROJECTION', ['age']],
-  ['SELECTION', ['id', '>=', '0']],
-  ['FILESCAN', ['people']]
-]
+query = util.tree([
+  Selection(lambda r: r.id == 1),[
+    MemScan('people')]])
 
-query3 = [
-  ['AVERAGE'],
-  ['PROJECTION', ['age']],
-  ['SELECTION', ['id', '>=', '0']],
-  ['FILESCAN', ['people']]
-]
-
-def execute_plan(plan):
-  result = Iterator(plan).next()
+def execute(plan):
   print('--- query ---')
   print('printing query :',plan)
-  print('printing result:',result)
-  return
+  result = []
+  for record in plan:
+    # yield record
+    result.append(record)
+  return result
 
 def main(function, cmd=None):
-  execute_plan(query)
-  execute_plan(query2)
-  execute_plan(query3)
+  execute(query)
   return
 
 if __name__ == '__main__':
