@@ -10,5 +10,8 @@ people = [
   OrderedDict([('id', '6'), ('name', 'CoCo'), ('age', '4')])
 ]
 
+numbers = [(n, n*n) for n in range(10)]
+
 def select(table):
-  return {'people': people}[table]
+  return {'people' : people,
+          'numbers': numbers}[table]
