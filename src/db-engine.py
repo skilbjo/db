@@ -7,13 +7,11 @@ from nodes import Projection, Selection, MemScan
     # Selection(lambda r: r.id == 1),[
       # MemScan(data.people)]]])
 
-# query = [Selection(lambda r: r.id == 1),[
-    # MemScan('people')]]
+query = [Selection(lambda r: r[0] % 2 == 1),[
+    MemScan('numbers')]]
 
-# query = [Projection(lambda r: r[0]),[
-    # MemScan('people')]]
-
-query = [MemScan('people')]
+# query = [Projection(lambda r: [r[0]]),[
+          # MemScan('people')]]
 
 def execute(plan):
   q = util.tree(plan)
@@ -25,6 +23,7 @@ def execute(plan):
   return result
 
 def main(function):
+  # execute([MemScan('people')])  # this works
   return execute(query)
 
 if __name__ == '__main__':
