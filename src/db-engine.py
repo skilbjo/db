@@ -1,30 +1,23 @@
 #!/usr/bin/env python3
-import util
+import util, queries
 from nodes import Projection, Selection, MemScan
-
-# query = util.tree([
-  # Projection(lambda r: r.'name'),[
-    # Selection(lambda r: r.id == 1),[
-      # MemScan(data.people)]]])
-
-query = [Selection(lambda r: r[0] % 2 == 1),[
-    MemScan('numbers')]]
-
-# query = [Projection(lambda r: [r[0]]),[
-          # MemScan('people')]]
 
 def execute(plan):
   q = util.tree(plan)
-  print('--- query ---')
-  print('printing    q: ',q)
-  print('printing plan: ',plan)
   result = list(util.execute(q))
   print('result:',result)
   return result
 
 def main(function):
-  # execute([MemScan('people')])  # this works
-  return execute(query)
+  # execute(queries.memscan_query)   # works
+  # execute(queries.memscan_people)  # works
+  # execute(queries.selection_numbers)  # works
+  # execute(queries.selection_people)   # works
+  # execute(queries.projection_numbers) # works
+  # execute(queries.projection_people)  # works
+  # execute(queries.projection_people_addition)  # works
+  execute(queries.projection_selection_people) # -
+  return
 
 if __name__ == '__main__':
   import argparse

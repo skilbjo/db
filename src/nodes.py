@@ -4,11 +4,8 @@ import util
 
 class PlanNode(object):
   def __init__(self):
-    print('PlanNode __init__ got called')
     self._inputs = []
   def __iter__(self):
-    print('PlanNode __iter__ got called')
-    # return next # JS: works on MemScan, others: TypeError: iter() returned non-iterator of type 'builtin_function_or_method'
     return self
   def __next__(self):
     raise NotImplementedError
@@ -17,11 +14,8 @@ class Projection(PlanNode):
   def __init__(self,mapping):
     super().__init__()
     self.mapping = mapping
-  # def __iter__(self):
-    # return iter(self.mapping)
   def __next__(self):
     record = next(self._inputs[0])
-    print(record)
     return tuple(self.mapping(record))
 
 class MemScan(PlanNode):
@@ -29,8 +23,6 @@ class MemScan(PlanNode):
     super().__init__()
     self.table     = data.select(table)
     self._iterable = iter(self.table)
-  # def __iter__(self):
-    # return iter(self.table)
   def __next__(self):
     return next(self._iterable)
 
