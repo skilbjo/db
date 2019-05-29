@@ -16,7 +16,8 @@ def main(function):
   # execute(queries.projection_numbers) # works
   # execute(queries.projection_people)  # works
   # execute(queries.projection_people_addition)  # works
-  execute(queries.projection_selection_people) # -
+  # execute(queries.projection_selection_people) # works
+  execute(queries.aggregation_people) # works
   return
 
 if __name__ == '__main__':

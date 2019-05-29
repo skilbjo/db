@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from nodes import Projection, Selection, MemScan
+from nodes import Aggregation, Projection, Selection, MemScan
 
 memscan_numbers = [MemScan('numbers')]
 # result: [(0, 0), (1, 1), (2, 4), (3, 9), (4, 16), (5, 25), (6, 36), (7, 49), (8, 64), (9, 81)]
@@ -30,3 +30,9 @@ projection_people_addition = [Projection(lambda r: [r['name'] + ' fren',r['age']
 projection_selection_people = [Projection(lambda r: [r['name']]),[
                                Selection(lambda r: r['id'] == 1),[
                                  MemScan('people')]]]
+# result: [('John',)]
+
+aggregation_people = [Aggregation('sum','age'),
+                       [Projection(lambda r: [r['name'], r['age']]),[
+                         Selection(lambda r: r['id'] >= 3),[
+                           MemScan('people')]]]]

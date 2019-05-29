@@ -4,19 +4,50 @@ import util
 
 class PlanNode(object):
   def __init__(self):
-    self._inputs = []
+    self._data = []
   def __iter__(self):
     return self
   def __next__(self):
     raise NotImplementedError
 
-class Projection(PlanNode):
-  def __init__(self,mapping):
+class Aggregation(PlanNode):
+  # def __init__(self, data, type, field): # type enum: sum, count, average
+  def __init__(self, type, field): # type enum: sum, count, average
     super().__init__()
-    self.mapping = mapping
+    self.type   = type
+    self.field  = field
+    self.result = {'sum': 0, 'count': 0, 'max': 0, 'min': 0}
   def __next__(self):
-    record = next(self._inputs[0])
-    return tuple(self.mapping(record))
+    while True:
+      record = next(self._data[0])
+      self.result['sum']   += record[self.field]
+      self.result['count'] += 1
+      if self.result['max'] < record[self.field]:
+        self.result['max'] = record[self.field]
+      if self.result['min'] > record[self.field]:
+        self.result['max'] = record[self.field]
+    if self.type == 'average':
+      return self.result['sum'] / self.result['count']
+    else:
+      return self.result[self.type]
+
+class Selection(PlanNode):
+  def __init__(self,predicate):
+    super().__init__()
+    self.predicate = predicate
+  def __next__(self):
+    while True:
+      record = next(self._data[0])
+      if self.predicate(record):
+        return record
+
+class Projection(PlanNode):
+  def __init__(self,output_fn):
+    super().__init__()
+    self.output_fn = output_fn
+  def __next__(self):
+    record = next(self._data[0])
+    return tuple(self.output_fn(record))
 
 class MemScan(PlanNode):
   def __init__(self,table):
@@ -26,15 +57,23 @@ class MemScan(PlanNode):
   def __next__(self):
     return next(self._iterable)
 
-class Selection(PlanNode):
-  def __init__(self,predicate):
+class Sort:
+  def __init__(self):
     super().__init__()
-    self.predicate = predicate
   def __next__(self):
-    while True:
-      record = next(self._inputs[0])
-      if self.predicate(record):
-        return record
+    yield
+
+class Distinct:
+  def __init__(self):
+    super().__init__()
+  def __next__(self):
+    yield
+
+class NestedLoopJoin:
+  def __init__(self):
+    super().__init__()
+  def __next__(self):
+    yield
 
 class Iterator(PlanNode):
   def __init__(self, plan):
