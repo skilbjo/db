@@ -10,10 +10,10 @@ from nodes import Projection, Selection, MemScan
 # query = [Selection(lambda r: r.id == 1),[
     # MemScan('people')]]
 
-query = [Projection(lambda r: r[0]),[
-    MemScan('people')]]
+# query = [Projection(lambda r: r[0]),[
+    # MemScan('people')]]
 
-# query = [MemScan('people')]
+query = [MemScan('people')]
 
 def execute(plan):
   q = util.tree(plan)

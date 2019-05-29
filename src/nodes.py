@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 import data
+import util
 
 class PlanNode(object):
   def __init__(self):
@@ -41,4 +43,4 @@ class Iterator(PlanNode):
   def __init__(self, plan):
     self.plan = plan
   def next(self):
-    return tree(self.plan)
+    return util.tree(self.plan)
