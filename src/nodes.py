@@ -10,6 +10,12 @@ class PlanNode(object):
   def __next__(self):
     raise NotImplementedError
 
+class NestedLoopJoin(PlanNode):
+  def __init__(self):
+    super().__init__()
+  def __next__(self):
+    yield
+
 class Aggregation(PlanNode):
   # def __init__(self, data, type, field): # type enum: sum, count, average
   def __init__(self, type, field): # type enum: sum, count, average
@@ -26,6 +32,8 @@ class Aggregation(PlanNode):
         self.result['max'] = record[self.field]
       if self.result['min'] > record[self.field]:
         self.result['max'] = record[self.field]
+    # while loop is a while forever loop; below code will not be run
+    print(self.type, self.result['sum'], self.result[self.type])
     if self.type == 'average':
       return self.result['sum'] / self.result['count']
     else:
@@ -57,19 +65,13 @@ class MemScan(PlanNode):
   def __next__(self):
     return next(self._iterable)
 
-class Sort:
+class Sort(PlanNode):
   def __init__(self):
     super().__init__()
   def __next__(self):
     yield
 
-class Distinct:
-  def __init__(self):
-    super().__init__()
-  def __next__(self):
-    yield
-
-class NestedLoopJoin:
+class Distinct(PlanNode):
   def __init__(self):
     super().__init__()
   def __next__(self):
