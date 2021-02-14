@@ -1,119 +1,84 @@
-import data, operator
+#!/usr/bin/env python3
+import data
+import util
 
-operator = {
-    '=' : operator.eq,
-    '!=': operator.ne,
-    '>' : operator.gt,
-    '>=': operator.ge,
-    '<' : operator.lt,
-    '<=': operator.le
-}
+class PlanNode(object):
+  def __init__(self):
+    self._data = []
+  def __iter__(self):
+    return self
+  def __next__(self):
+    raise NotImplementedError
 
-class Selection:
-  def __init__(self,data,predicate):
-    self.data      = data
-    self.predicate = predicate
-  def next(self):
-    row = self.data.next()
-    if row != 'EOF':
-      if operator[self.predicate[1]](row[self.predicate[0]], self.predicate[2]):
-        return row
-    else:
-      return 'EOF'
+class NestedLoopJoin(PlanNode):
+  def __init__(self):
+    super().__init__()
+  def __next__(self):
+    yield
 
-class Scan:
-  def __init__(self,table):
-    self.table      = data.select(table)
-    self.length     = len(self.table) - 1
-    self.index      = 0
-  def next(self):
-    result = []
-    if self.index < self.length:
-      result = self.table[self.index]
-      self.index += 1
-    elif self.index == self.length:
-      result = self.table[self.index]
-      self.index += 1
-    else:
-      result = 'EOF'
-    return result
-
-class Projection:
-  def __init__(self, data, fields):
-    from collections import OrderedDict
-    self.data     = data
-    self.fields   = fields # ['id', 'name']
-    self.result   = OrderedDict()
-  def next(self):
-    row = self.data.next()
-    if row == 'EOF' or row is None:
-      return row
-    else:
-      for field in self.fields: # return [row[k] for k in self.fields] # returns list, not OrderedDict
-        self.result.update({field : row[field]})
-      return self.result
-
-class Aggregation:
-  def __init__(self, data, type, field): # type enum: sum, count, average
-    self.data   = data
+class Aggregation(PlanNode):
+  # def __init__(self, data, type, field): # type enum: sum, count, average
+  def __init__(self, type, field): # type enum: sum, count, average
+    super().__init__()
     self.type   = type
     self.field  = field
-    self.result = {'sum': 0, 'count': 0}
-  def next(self):
-    row = self.data.next()
-    while row != 'EOF':
-      if row is not None:
-        self.result['sum']   += int(row[self.field])
-        self.result['count'] += 1
-      row = self.data.next()
+    self.result = {'sum': 0, 'count': 0, 'max': 0, 'min': 0}
+  def __next__(self):
+    while True:
+      record = next(self._data[0])
+      self.result['sum']   += record[self.field]
+      self.result['count'] += 1
+      if self.result['max'] < record[self.field]:
+        self.result['max'] = record[self.field]
+      if self.result['min'] > record[self.field]:
+        self.result['max'] = record[self.field]
+    # while loop is a while forever loop; below code will not be run
+    print(self.type, self.result['sum'], self.result[self.type])
     if self.type == 'average':
       return self.result['sum'] / self.result['count']
     else:
       return self.result[self.type]
 
-class Sort:
+class Selection(PlanNode):
+  def __init__(self,predicate):
+    super().__init__()
+    self.predicate = predicate
+  def __next__(self):
+    while True:
+      record = next(self._data[0])
+      if self.predicate(record):
+        return record
+
+class Projection(PlanNode):
+  def __init__(self,output_fn):
+    super().__init__()
+    self.output_fn = output_fn
+  def __next__(self):
+    record = next(self._data[0])
+    return tuple(self.output_fn(record))
+
+class MemScan(PlanNode):
+  def __init__(self,table):
+    super().__init__()
+    self.table     = data.select(table)
+    self._iterable = iter(self.table)
+  def __next__(self):
+    return next(self._iterable)
+
+class Sort(PlanNode):
   def __init__(self):
-    return
-  def next(self):
+    super().__init__()
+  def __next__(self):
     yield
 
-class Distinct:
+class Distinct(PlanNode):
   def __init__(self):
-    return
-  def next(self):
+    super().__init__()
+  def __next__(self):
     yield
 
-class NestedLoopJoin:
-  def __init__(self, r, s, r_key, s_key):
-    self.r = r
-    self.s = s
-    self.r_key = r_key
-    self.s_key = s_key
-  def next(self):
-    yield
-
-node_translation = {
-  'AGGREGATION': Aggregation,
-  'FILESCAN'   : Scan,
-  'PROJECTION' : Projection,
-  'SELECTION'  : Selection
-}
-
-class Iterator:
+class Iterator(PlanNode):
   def __init__(self, plan):
     self.plan = plan
-    self.scan        = node_translation['FILESCAN'](plan['FILESCAN'][0])
-    self.selection   = node_translation['SELECTION'](self.scan, plan['SELECTION'])
-    self.projection  = node_translation['PROJECTION'](self.selection, plan['PROJECTION'])
-    self.aggregation = node_translation['AGGREGATION'](self.projection, plan['AGGREGATION'][0], plan['AGGREGATION'][1]) if 'AGGREGATION' in self.plan else None
-    self.result      = []
   def next(self):
-    if self.aggregation:
-      row = self.aggregation.next()
-      return row
-    else:
-      row = self.projection.next()
-      while row != 'EOF':
-        self.result.append(row)
-        row = self.projection.next()
-      return [x for x in self.result if x is not None]
+    return util.tree(self.plan)
